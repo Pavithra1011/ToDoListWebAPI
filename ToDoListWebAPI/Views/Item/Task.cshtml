@@ -1,0 +1,187 @@
+﻿@{
+    ViewBag.Title = "Task";
+}
+
+<html ng-app="taskApp">
+<head>
+    <title></title>
+    <script src="~/Scripts/angular.min.js"></script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.1.1.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/Module.js"></script>
+    <script src="~/Content/Controller.js"></script>
+    <script src="~/Content/Service.js"></script>
+    <script src="~/Content/dirPagination.js"></script>
+    <script src="~/Content/ngDatepicker.min.js"></script>
+    <link href="~/Content/ngDatePicker.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            border: none;
+            text-align: left;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" ng-controller="taskCntrl">
+
+        <input type="button" class="btn btn-success btn-lg" ng-click="AddTaskDiv();" value="Add Task" style="margin-left: 15px;" data-toggle="modal" data-target="#taskModal" />
+        <hr style="width: 550px;" />
+
+        <form class="form-inline">
+            <div class="form-group">
+                <b>Search : </b>
+                <input type="text" placeholder="Search" class="form-control" ng-model="search" />
+            </div>
+        </form>
+        <br />
+        <table cellpadding="12" class="table table-bordered table-hover table-striped">
+            <tr class="success">
+                <th style="cursor: pointer;" ng-click="sort('id')"><b>Task ID</b> <span class="glyphicon sort-icon" ng-show="sortKey=='id'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span></th>
+                <th style="cursor: pointer;" ng-click="sort('sText')"><b>Details</b> <span class="glyphicon sort-icon" ng-show="sortKey=='sText'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span></th>
+                <th style="cursor: pointer; width:200px"  ng-click="sort('dtDueDate')"><b>Due Date</b> <span class="glyphicon sort-icon" ng-show="sortKey=='dtDueDate'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span></th>
+                <th style="cursor: pointer;" ng-click="sort('sPriority')"><b>Priority</b> <span class="glyphicon sort-icon" ng-show="sortKey=='sPriority'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span></th>
+                <th style="cursor: pointer;" ng-click="sort('bComplete')"><b>Done</b> <span class="glyphicon sort-icon" ng-show="sortKey=='bComplete'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span></th>
+                <th><b>Actions</b></th>
+            </tr>
+            <tr dir-paginate="task in tasks|orderBy:sortKey:reverse|filter:search|itemsPerPage:10" ng-class="{'complete': task.bComplete==true}" ng-model="search">
+
+                <td>
+                    {{task.Id}}
+                </td>
+                <td>
+                    {{task.sText}}
+                </td>
+                <td>
+                    {{task.dtDueDate | date}}
+                </td>
+                <td>
+                    {{task.sPriority}}
+                </td>
+                <td>
+                    {{task.bComplete ? "Yes" : "No"}}
+                </td>
+                <td>
+                    <a class="btn btn-Primary btn-sm" ng-click="editTask(task)" data-toggle="modal" data-target="#taskModal" href="">Edit</a>
+                    <a class="btn btn-Primary btn-sm" ng-click="deleteTask(task)" href="">Delete</a>
+                </td>
+            </tr>
+            <b style="color: #5bc0de;">Total Records </b>:
+            <b>{{tasks.length}} </b>
+        </table>
+
+        <dir-pagination-controls max-size="10"
+                                 direction-links="true"
+                                 boundary-links="true">
+        </dir-pagination-controls>
+
+        <div id="taskModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                        <h4 class="modal-title">{{Action}} Task Details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2" style="margin-left: 20px; color: #5bc0de;">
+                                        <b>Details :</b>
+                                    </div>
+                                    <div class="col-md-8 col-sm-8">
+                                        <input type="text"  class="form-control" data-modal="modal" ng-pattern="regex" task-directive ng-model="Details" id="Text" placeholder="DetailText" ng-required="true" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2" style="margin-left: 20px; color: #5bc0de;">
+                                        <b>Due Date :</b>
+                                    </div>
+                                    <div class="col-md-8 col-sm-8">
+                                        <div class="input-group date">
+                                           <ng-datepicker ng-model="DueDate" view-format="DD-MM-YYYY" class="form-control" ng-required="true" ng-readonly="true">
+                                            </ng-datepicker>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2" style="margin-left: 20px; color: #5bc0de;">
+                                        <b>Priority:</b>
+                                    </div>
+                                    <div class="col-md-8 col-sm-8" ng-required="true">
+                                        <select id="ddlPriority" class="form-control" data-modal="modal" ng-model="Priority" ng-required="true">
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2" style="margin-left: 20px; color: #5bc0de;">
+                                        <b>Done:</b>
+                                    </div>
+                                    <div class="col-md-8 col-sm-8" ng-required="true">
+                                        <input class="form-control" type="checkbox" id="chkComplete" ng-model="Complete">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-2" style="margin-left: 20px; color: #5bc0de;"></div>
+                                    <div class="col-md-8 col-sm-8">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <input type="button" class="btnAdd btn btn-success" value="Save" ng-click="AddUpdateTask()"  data-dismiss="modal" />
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- dialog body -->
+                    <div class="modal-body">
+                        <button type="button" class="close" data-dismiss="modal">×</button>
+                        {{msg}}
+                    </div>
+                    <!-- dialog buttons -->
+                    <div class="modal-footer">
+                        <button type="button" ng-click="alertmsg()" class="btn btn-primary">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+</html>
